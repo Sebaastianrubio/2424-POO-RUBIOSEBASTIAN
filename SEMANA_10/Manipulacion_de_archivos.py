@@ -5,17 +5,38 @@ class Producto:
         self.cantidad = cantidad
         self.precio = precio
 
-
     def __str__(self):
         return f"Código: {self.codigo}, Nombre: {self.nombre}, Cantidad: {self.cantidad}, Precio: {self.precio}"
+
 
 class Inventario:
     def __init__(self):
         self.productos = []
+        self.archivo = "inventario.txt"
+        self._cargar_inventario()
+
+    def _cargar_inventario(self):
+        """Carga el inventario desde el archivo al iniciar el sistema."""
+        try:
+            with open(self.archivo, 'r') as file:
+                for linea in file:
+                    codigo, nombre, cantidad, precio = linea.strip().split(", ")
+                    self.productos.append(Producto(int(codigo), nombre, int(cantidad), float(precio)))
+        except FileNotFoundError:
+            # Si el archivo no existe, se crea uno nuevo.
+            with open(self.archivo, 'w'):
+                pass
+
+    def _guardar_inventario(self):
+        """Guarda el inventario actual en el archivo."""
+        with open(self.archivo, 'w') as file:
+            for producto in self.productos:
+                file.write(f"{producto.codigo}, {producto.nombre}, {producto.cantidad}, {producto.precio}\n")
 
     def agregar_producto(self, producto):
         self.productos.append(producto)
         print(f"Producto {producto.nombre} agregado al inventario.")
+        self._guardar_inventario()
 
     def actualizar_producto(self, codigo, nueva_cantidad, nuevo_precio):
         for producto in self.productos:
@@ -23,6 +44,7 @@ class Inventario:
                 producto.cantidad = nueva_cantidad
                 producto.precio = nuevo_precio
                 print(f"Producto {producto.nombre} actualizado.")
+                self._guardar_inventario()
                 return
         print("Producto no encontrado.")
 
@@ -31,6 +53,7 @@ class Inventario:
             if producto.codigo == codigo:
                 self.productos.remove(producto)
                 print(f"Producto {producto.nombre} eliminado del inventario.")
+                self._guardar_inventario()
                 return
         print("Producto no encontrado.")
 
@@ -40,6 +63,7 @@ class Inventario:
         else:
             for producto in self.productos:
                 print(producto)
+
 
 # Uso del sistema de gestión de inventarios
 inventario = Inventario()
